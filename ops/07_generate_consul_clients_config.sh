@@ -54,15 +54,58 @@ EOF
 
 for dc in "${DATACENTERS[@]}" ; do
 
-    for svc in "${SERVICES[@]}" ; do
+  for svc in "${SERVICES[@]}" ; do
 
-        log "Generate token for agent"
+    ADDR="svc-${dc}-${svc}"
+    
+    log "Generate token for agent ${ADDR}"
+    
+    consul acl token create -description "svc-${dc}-${svc} agent token" -node-identity "${ADDR}:${dc}" -service-identity="${svc}"  --format json > ${ASSETS}/acl-token-${ADDR}.json 2> /dev/null
 
-        log "Generate node specific configuration"
+    TOK=`cat ${ASSETS}/acl-token-${ADDR}.json | jq -r ".SecretID"`
 
-        log "Copy configuration on agent"
+    tee ${ASSETS}/agent-client-${ADDR}-acl-tokens.hcl > /dev/null << EOF
+acl {
+  tokens {
+    agent  = "${TOK}"
+    default  = "${DNS_TOK}"
+  }
+}
+EOF
 
-    done
+    log "Generate node specific configuration"
+
+    RETRY_JOIN=`generate_retry_join ${dc}`
+  
+  tee ${ASSETS}/agent-client-${ADDR}-specific.hcl > /dev/null << EOF
+## CLient specific configuration for ${dc}
+server = false
+datacenter = "${dc}"
+domain = "${DOMAIN}" 
+
+#client_addr = "127.0.0.1"
+
+retry_join = [ ${RETRY_JOIN} ]
+EOF
+
+    log "Copy configuration on agent"
+
+    wait_for ${ADDR}${FQDN_SUFFIX}
+
+    ssh -o ${SSH_OPTS} ${ADDR}${FQDN_SUFFIX} \
+    "mkdir -p ${WORKDIR}/consul/config \
+      && mkdir -p ${WORKDIR}/consul/data \
+      && mkdir -p ${WORKDIR}/logs" > /dev/null 2>&1
+
+    # Copy configuration files
+    scp -o ${SSH_OPTS} ${ASSETS}/agent-gossip-encryption.hcl             ${ADDR}${FQDN_SUFFIX}:${WORKDIR}consul/config > /dev/null 2>&1
+    scp -o ${SSH_OPTS} ${ASSETS}/agent-client-secure.hcl                 ${ADDR}${FQDN_SUFFIX}:${WORKDIR}consul/config > /dev/null 2>&1
+    # scp -o ${SSH_OPTS} ${ASSETS}/agent-connect.hcl                     ${ADDR}${FQDN_SUFFIX}:${WORKDIR}consul/config > /dev/null 2>&1
+    scp -o ${SSH_OPTS} ${ASSETS}/consul-agent-ca-${dc}.pem               ${ADDR}${FQDN_SUFFIX}:${WORKDIR}consul/config/consul-agent-ca.pem > /dev/null 2>&1
+    scp -o ${SSH_OPTS} ${ASSETS}/agent-client-${ADDR}-acl-tokens.hcl     ${ADDR}${FQDN_SUFFIX}:${WORKDIR}consul/config > /dev/null 2>&1
+    scp -o ${SSH_OPTS} ${ASSETS}/agent-client-${ADDR}-specific.hcl       ${ADDR}${FQDN_SUFFIX}:${WORKDIR}consul/config > /dev/null 2>&1
+
+  done
 done
 
 # ++-----------------+
