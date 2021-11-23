@@ -2,9 +2,9 @@
 
 Modular lab to spin-up a Consul datacenter using custom [Docker][docker] images.
 
-**Warning:** The environment is not intended for production use. It is intended 
-to mimic the behavior of a VM with a container and build test environments to 
-test Consul functionalities without the overhead of deploying a full VM.
+<div style="background-color:#fcf6ea; color:#866d42; border:1px solid #f8ebcf; padding:1em; border-radius:3px; margin:24px 0;">
+  <p><strong>Warning:</strong> The environment is not intended for production use. It is intended to mimic the behavior of a VM with a container and build test environments to test Consul functionalities without the overhead of deploying a full VM.
+</p></div>
 
 Temporary architecture image:
 
@@ -71,7 +71,9 @@ By default the first value of the array should match `PRIMARY_DATACENTER` value.
 3 named `consul-server-dc1-x` (with `1` <= `x` <= `${SERVER_NUMBER}`)
 3 named `consul-server-dc2-x` (with `1` <= `x` <= `${SERVER_NUMBER}`)
 
-> **Note:** All the datacenters created will automatically be federated using WAN federation
+<div style="background-color:#eff5ff; color:#416f8c; border:1px solid #d0e0ff; padding:1em; border-radius:3px; margin:24px 0;">
+  <p><strong>Note:</strong> All the datacenters created will automatically be federated using WAN federation
+</p></div>
 
 ### Scenario services - Still not completely defined
 
@@ -163,7 +165,7 @@ subset of actions.
 ## Instruqt compatibility
 
 The script is deployed to have a testbed for Consul advanced scenarios but also 
-as a kick-off for the creation of [Instruqt][https://play.instruqt.com/] scenarios.
+as a kick-off for the creation of [Instruqt][instruqt] scenarios.
 
 The scripts use the internal Docker DNS to address containers but, if running in 
 Instruqt uses the pre-populated `INSTRUQT_PARTICIPANT_ID` environment variable to
@@ -199,15 +201,7 @@ docker exec -it operator /bin/bash -c "ls -1 /home/app/logs"
 * `certificates.log` - All certificates generated for the scenario in readable format
 * `files_created.log` - A summary of the different files created by the different sections
 
-
-[vault]:https://www.vaultproject.io
-[consul]:https://www.consul.io/
-[envoy]:https://www.envoyproxy.io/
-[docker]:https://www.docker.com/
-[instruqt]:https://play.instruqt.com/
-
-
-## Cleaning local files
+## Clean local files
 
 ### Clean environment
 
@@ -225,3 +219,10 @@ created ones with the following command.
 ```
 docker rmi -f $(docker images -q <your-repo>/*)
 ```
+
+
+[vault]:https://www.vaultproject.io
+[consul]:https://www.consul.io/
+[envoy]:https://www.envoyproxy.io/
+[docker]:https://www.docker.com/
+[instruqt]:https://play.instruqt.com/
