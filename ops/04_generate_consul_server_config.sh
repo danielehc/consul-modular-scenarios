@@ -163,7 +163,7 @@ retry_join_wan = [ ${RETRY_JOIN_WAN} ]
 EOF
 
   ########## ------------------------------------------------
-  header2     "Distribute Consul server config for ${dc}"
+  header3     "Distribute Consul server config for ${dc}"
   ###### -----------------------------------------------
 
   for serv in $(seq 1 ${SERVER_NUMBER}); do 
@@ -196,6 +196,30 @@ EOF
   done 
 
 done
+
+########## ------------------------------------------------
+header2     "Generate Global service mesh configuration"
+###### -----------------------------------------------
+
+tee ${ASSETS}/config-global-proxy-default.hcl > /dev/null << EOF
+Kind      = "proxy-defaults"
+Name      = "global"
+Config {
+  protocol = "http"
+}
+EOF
+
+
+tee ${ASSETS}/config-global-intentions.hcl > /dev/null << EOF
+Kind = "service-intentions"
+Name = "*"
+Sources = [
+  {
+    Name = "*"
+    Action = "deny"
+  }
+]
+EOF
 
 # ++-----------------+
 # || Output          |

@@ -60,7 +60,7 @@ spin_container_param() {
   --name=${CONTAINER_NAME} \
   --hostname=${CONTAINER_NAME} \
   --label tag=${DK_TAG} ${EXTRA_PARAMS}\
-  ${IMAGE} "" > /dev/null 2>&1
+  ${IMAGE} > /dev/null 2>&1
 }
 
 spin_container() {
@@ -107,6 +107,14 @@ login() {
   docker exec -it $1 /bin/bash
 }
 
+build() {
+  
+  ########## ------------------------------------------------
+  header1     "BUILDING DOCKER IMAGES"
+  ###### -----------------------------------------------
+  ./images/batch_build.sh $1
+}
+
 # ++-----------------+
 # || Variables       |
 # ++-----------------+
@@ -114,15 +122,24 @@ login() {
 # --- GLOBAL VARS AND FUNCTIONS ---
 source ops/00_global_vars.env
 
+# --- FLOW CONTROL ---
+
+## Build docker imgages on startup
+BUILD_ON_STARTUP=true
+
+## Generate new certificates
+export GEN_NEW_CERTS=false
+
 # --- CONSUL ---
-
-
-CONSUL_VERSION=${CONSUL_VERSION:="1.10.3"}
+CONSUL_VERSION=${CONSUL_VERSION:="latest"}
 VAULT_VERSION="latest"
 
 # --- DOCKER IMAGE ---
-IMAGE_NAME=danielehc/consul-instruqt-base
+# ${DOCKER_REPOSITORY}/${IMAGE_NAME_BASE}:${IMAGE_TAG}
+DOCKER_REPOSITORY=${DOCKER_REPOSITORY:-"danielehc"}
+IMAGE_NAME_BASE="consul-instruqt-base"
 IMAGE_TAG=v${CONSUL_VERSION}
+
 
 # --- ENVIRONMENT ---
 
@@ -148,7 +165,19 @@ elif [ "$1" == "operate" ]; then
 elif [ "$1" == "login" ]; then
   login $2
   exit 0
+elif [ "$1" == "build" ]; then
+  export CONSUL_VERSION
+  # export DOCKER_REPOSITORY
+  build "./images/"
+  exit 0
+elif [ "$1" == "build_only" ]; then
+  export CONSUL_VERSION
+  export ONLY_BUILD=true
+  # export DOCKER_REPOSITORY
+  build "./images/"
+  exit 0
 fi
+
 
 ## Clean environment
 log "Cleaning Environment"
@@ -163,10 +192,10 @@ log "Creating Network ${DK_NET}"
 docker network create ${DK_NET} --subnet=172.20.0.0/24 --label tag=${DK_TAG}
 
 # log "Starting Vault"
-spin_container_param "vault" "${DK_NET}" "${IMAGE_NAME}:${IMAGE_TAG}" "-e 'VAULT_DEV_ROOT_TOKEN_ID=password'"
+spin_container_param "vault" "${DK_NET}" "${DOCKER_REPOSITORY}/${IMAGE_NAME_BASE}:${IMAGE_TAG}" "-e 'VAULT_DEV_ROOT_TOKEN_ID=password'"
 
 # log "Starting Operator"
-spin_container_param "operator" "${DK_NET}" "${IMAGE_NAME}:${IMAGE_TAG}"
+spin_container_param "operator" "${DK_NET}" "${DOCKER_REPOSITORY}/${IMAGE_NAME_BASE}:${IMAGE_TAG}"
 
 ## now loop through the above array
 for dc in "${DATACENTERS[@]}" ; do
@@ -192,7 +221,7 @@ for dc in "${DATACENTERS[@]}" ; do
     for serv in $(seq 1 ${SERVER_NUMBER}); do 
 
       # log "Starting Consul server consul-server-$dc-$serv"
-      spin_container_param "consul-server-$dc-$serv" "${DK_NET}" "${IMAGE_NAME}:${IMAGE_TAG}"
+      spin_container_param "consul-server-$dc-$serv" "${DK_NET}" "${DOCKER_REPOSITORY}/${IMAGE_NAME_BASE}:${IMAGE_TAG}"
 
     done
 
@@ -203,8 +232,16 @@ for dc in "${DATACENTERS[@]}" ; do
 
       for svc in "${SERVICES[@]}" ; do
 
+        if [ "${SVC_MATCH_IMAGE_NAME}" == true ]; then
+          IMAGE_NAME="hashicups-${svc}"
+          IMG_TAG="latest"
+        else
+          IMAGE_NAME=${IMAGE_NAME_BASE}
+          IMG_TAG=${IMAGE_TAG}
+        fi
+
         # log "Starting Consul client svc-$dc-$svc"
-        spin_container_param "svc-$dc-$svc" "${DK_NET}" "${IMAGE_NAME}:${IMAGE_TAG}"
+        spin_container_param "svc-$dc-$svc" "${DK_NET}" "${DOCKER_REPOSITORY}/${IMAGE_NAME}:${IMG_TAG}"
 
       done
     fi
@@ -217,7 +254,7 @@ for dc in "${DATACENTERS[@]}" ; do
       for gw in "${MESH_ELEMENTS[@]}" ; do
 
         # log "Starting Consul client mesh-$dc-$gw"
-        spin_container_param "mesh-$dc-$gw" "${DK_NET}" "${IMAGE_NAME}:${IMAGE_TAG}"
+        spin_container_param "mesh-$dc-$gw" "${DK_NET}" "${DOCKER_REPOSITORY}/${IMAGE_NAME_BASE}:${IMAGE_TAG}"
 
       done
     fi

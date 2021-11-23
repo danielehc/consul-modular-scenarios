@@ -46,7 +46,6 @@ export CONSUL_HTTP_TOKEN=`cat ${ASSETS}/acl-token-bootstrap.json | jq -r ".Secre
 
 ## At this point all the environment variables are setup.
 ## Generate the env file for Consul
-
 print_env consul > ${ASSETS}/env-consul-${PRIMARY_DATACENTER}.conf
 
 log "Create ACL policies and tokens"
@@ -136,6 +135,17 @@ EOF
 
 fi
 
+
+## Apply global configuration to service mesh
+########## ------------------------------------------------
+header1     "CONSUL - APPLY SERVICE MESH GLOBAL CONFIG"
+###### -----------------------------------------------
+
+for i in `find ${ASSETS}/ -name "config-global-*"`; do
+
+  consul config write $i
+
+done 
 
 # ++-----------------+
 # || Output          |
