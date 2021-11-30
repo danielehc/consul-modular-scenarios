@@ -91,6 +91,8 @@ log "Generate TLS certificates using Vault"
 header3     "Generate Root CA"
 ###### -----------------------------------------------
 
+log "Configure Root CA for ${DOMAIN}"
+
 vault secrets enable pki
 
 vault secrets tune -max-lease-ttl=${VAULT_MAX_LEASE_ROOT_CA} pki

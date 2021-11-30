@@ -216,5 +216,5 @@ done
 # || Output          |
 # ++-----------------+
 
-get_created_files --verbose
+get_created_files
 

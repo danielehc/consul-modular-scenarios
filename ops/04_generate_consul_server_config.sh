@@ -201,6 +201,8 @@ done
 header2     "Generate Global service mesh configuration"
 ###### -----------------------------------------------
 
+log "Generate proxy-defaults"
+
 tee ${ASSETS}/config-global-proxy-default.hcl > /dev/null << EOF
 Kind      = "proxy-defaults"
 Name      = "global"
@@ -209,6 +211,7 @@ Config {
 }
 EOF
 
+log "Generate default service-intentions"
 
 tee ${ASSETS}/config-global-intentions.hcl > /dev/null << EOF
 Kind = "service-intentions"

@@ -5,12 +5,12 @@
 # ++-----------------+
 
 WORKDIR="/home/app/"
-ASSETS=${WORKDIR}assets
-LOGS=${WORKDIR}logs
+ASSETS="${WORKDIR}assets/"
+LOGS="${WORKDIR}logs/"
 
-LOG_PROVISION="${LOGS}/provision.log"
-LOG_CERTIFICATES="${LOGS}/certificates.log"
-LOG_FILES_CREATED="${LOGS}/files_created.log"
+LOG_PROVISION="${LOGS}provision.log"
+LOG_CERTIFICATES="${LOGS}certificates.log"
+LOG_FILES_CREATED="${LOGS}files_created.log"
 
 # Create necessary directories to operate
 mkdir -p ${ASSETS}
@@ -72,13 +72,11 @@ wait_for() {
 
   _HOSTNAME=$1
 
-  log "Waiting for $1"
-
   _NODE_IP=`dig +short $1`
 
   while [ -z ${_NODE_IP} ]; do
 
-    echo "$1 not running yet"
+    log_warn "$1 not running yet"
 
     _NODE_IP=`dig +short $1`
   
@@ -122,4 +120,17 @@ get_created_files() {
   sleep 1
 
 }
+
+# ++-----------------+
+# || Begin           |
+# ++-----------------+
+
+# Check if start filebrowser on operator
+if [ "${START_FILE_BROWSER}" == true ]; then
+  log "Starting filebrowser on operator"
+  LOG_FILEBROWSER="${LOGS}filebrowser.log"
+  nohup filebrowser > ${LOG_FILEBROWSER} 2>&1 &
+fi
+
+
 

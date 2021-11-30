@@ -32,10 +32,10 @@ for i in `seq 1 9`; do
     break;
   else
     if [ $i -eq 9 ]; then
-      echo 'Failed to bootstrap ACL system, exiting.';
+      echo -e '\033[1m\033[31m[ERROR] \033[0m Failed to bootstrap ACL system, exiting.';
       exit 1
     else
-      echo 'ACL system not ready. Retrying...';
+      echo -e '\033[1m\033[33m[WARN] \033[0m ACL system not ready. Retrying...';
       sleep 5;
     fi
   fi
@@ -141,6 +141,7 @@ fi
 header1     "CONSUL - APPLY SERVICE MESH GLOBAL CONFIG"
 ###### -----------------------------------------------
 
+log "Apply global configuration"
 for i in `find ${ASSETS}/ -name "config-global-*"`; do
 
   consul config write $i

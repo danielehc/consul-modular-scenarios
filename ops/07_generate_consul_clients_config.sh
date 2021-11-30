@@ -9,7 +9,7 @@
 # ++-----------------+
 
 ########## ------------------------------------------------
-header1     "CONSUL - CONFIGURE CLIENT CONFIGURATION"
+header1     "CONSUL - GENERATE CLIENT CONFIGURATION"
 ###### -----------------------------------------------
 
 ########## ------------------------------------------------
@@ -112,5 +112,5 @@ done
 # || Output          |
 # ++-----------------+
 
-get_created_files --verbose
+get_created_files
 

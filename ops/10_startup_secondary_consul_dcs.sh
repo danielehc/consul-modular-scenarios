@@ -56,7 +56,7 @@ EOF
 
   fi
 
-  ## TODO: Define ENV variables and sve them in file
+  ## TODO: Define ENV variables and save them in file
 
 done
 

@@ -10,24 +10,25 @@ Temporary architecture image:
 
 ![Temporary Arch](https://raw.githubusercontent.com/hashicorp-demoapp/hashicups-setups/main/docker-compose-consul/overview.png)
 
+
 ## Usage examples
 
 You can test the scenario by running:
 
 ```shell-session
 export DOCKER_REPOSITORY=your-repo && \
-    ./prov_containers.sh build_only && \
-    ./prov_containers.sh && \
-    ./prov_containers.sh operate
+    ./provision.sh build_only && \
+    ./provision.sh && \
+    ./provision.sh operate
 ```
 
 inside the repository root.
 
 The command will:
 * Define the Docker repository to use for building images (`export DOCKER_REPOSITORY=your-repo`)
-* Build all needed images locally without pushing to DockerHub (`./prov_containers.sh build_only`)
-* Provision the containers according to configuration (`./prov_containers.sh`)
-* Configure and deploy Consul on the containers (`./prov_containers.sh operate`)
+* Build all needed images locally without pushing to DockerHub (`./provision.sh build_only`)
+* Provision the containers according to configuration (`./provision.sh`)
+* Configure and deploy Consul on the containers (`./provision.sh operate`)
 
 Read the following sections to more details on what the script does.
 
@@ -98,7 +99,7 @@ the `fake-service` binary provided by the `base` image.
 ## Spin-up environment
 
 ```shell-session
-./prov_containers.sh
+./provision.sh
 ```
 
 Spins up containers for:
@@ -137,7 +138,7 @@ Example output:
 ## Execute scenario
 
 ```shell-session
-./prov_containers.sh operate
+./provision.sh operate
 ```
 
 The command combines all the files in the `./ops` folder into a single script, 
@@ -208,7 +209,7 @@ docker exec -it operator /bin/bash -c "ls -1 /home/app/logs"
 Stops and removes the containers used by the environment.
 
 ```
-./prov_containers.sh clean
+./provision.sh clean
 ```
 
 ### Delete Docker images

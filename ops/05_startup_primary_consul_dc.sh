@@ -19,7 +19,7 @@ header1     "STARTING PRIMARY DATACENTER SERVERS"
 
 for serv in $(seq 1 ${SERVER_NUMBER}); do 
 
-  log "Starting consul-server-${PRIMARY_DATACENTER}-${serv}"
+  log "Starting Consul on consul-server-${PRIMARY_DATACENTER}-${serv}"
 
   ssh -o ${SSH_OPTS} consul-server-${PRIMARY_DATACENTER}-${serv}${FQDN_SUFFIX} \
     "/usr/local/bin/consul agent \

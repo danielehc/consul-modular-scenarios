@@ -47,7 +47,7 @@ for svc in "${SERVICES[@]}" ; do
   fi
 
   ## Start Envoy sidecar
-  log "Starting sidecar for scv-${PRIMARY_DATACENTER}-${svc}"
+  log "Starting Envoy sidecar for scv-${PRIMARY_DATACENTER}-${svc}"
 
   TOK=`cat ${ASSETS}/acl-token-${ADDR}.json | jq -r ".SecretID"`
 
@@ -56,11 +56,13 @@ for svc in "${SERVICES[@]}" ; do
 
 done
 
+log "Apply service-intentions"
 for i in `find ${ASSETS}/ -name "config-intentions-${PRIMARY_DATACENTER}-*"`; do
   # log_err Found asset $i
   consul config write $i
 done 
 
+log "Apply service-defaults"
 for i in `find ${ASSETS}/ -name "config-service-${PRIMARY_DATACENTER}-*"`; do
   # log_err Found asset $i
   consul config write $i

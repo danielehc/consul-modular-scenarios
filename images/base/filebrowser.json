@@ -1,0 +1,8 @@
+{
+  "port": 7777,
+  "baseURL": "",
+  "address": "",
+  "log": "stdout",
+  "database": "/database.db",
+  "root": "/home/app"
+}
